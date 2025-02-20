@@ -33,7 +33,7 @@ def topic_selection():
                 st.session_state.selected_topic = selected_topic
                 st.session_state.screen = "timer"  # Change screen to timer
                 st.session_state.start_time = time.time()  # Set start time
-                st.experimental_rerun()
+                st.rerun()
 
 # Function to handle the timer screen
 def timer_screen():
@@ -52,23 +52,31 @@ def timer_screen():
     progress = 1 - (remaining_time / (30 * 60))
     st.progress(progress)
     
-    # Check if time's up
+    # Check for time warnings and end of time
     if remaining_time <= 0:
         st.error("Time's up!")
+        st.balloons()
+    elif remaining_time == 5 * 60:  # 5-minute warning
+        st.warning("5 minutes remaining!")
+    elif remaining_time == 10 * 60:  # 10-minute warning
+        st.info("10 minutes remaining!")
     
     # Button to go back to topic selection
     if st.button("Back to Topic Selection"):
         st.session_state.screen = "topics"  # Go back to topic selection screen
-        st.experimental_rerun()
+        st.rerun()
     
     # Rerun the app every second to update the timer
     time.sleep(1)
-    st.experimental_rerun()
+    st.rerun()
 
 # Main app logic (decides which screen to display)
 def main():
     if 'screen' not in st.session_state:
         st.session_state.screen = "topics"  # Initial screen is topic selection
+
+    if 'start_time' not in st.session_state:
+        st.session_state.start_time = time.time()
 
     if st.session_state.screen == "topics":
         topic_selection()
