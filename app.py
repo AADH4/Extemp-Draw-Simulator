@@ -8,27 +8,28 @@ def timer_function():
     if 'time_left' not in st.session_state:
         st.session_state.time_left = 30 * 60  # 30 minutes in seconds
         st.session_state.timer_running = False
-        st.session_state.timer_started = False
+        st.session_state.start_time = None
+        st.session_state.time_started = False
 
     # Layout the buttons in columns
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col1:
         if not st.session_state.timer_running:
-            if st.button('Start Timer'):
+            if st.button('Start Timer', key="start"):
                 st.session_state.timer_running = True
-                st.session_state.start_time = time.time() - st.session_state.time_left
+                st.session_state.start_time = time.time()  # Record the start time when "Start" is pressed
 
         else:
-            if st.button('Stop Timer'):
+            if st.button('Stop Timer', key="stop"):
                 st.session_state.timer_running = False
                 st.session_state.time_left = max(0, int(st.session_state.time_left - (time.time() - st.session_state.start_time)))
     
     with col2:
-        if st.button('Reset Timer'):
+        if st.button('Reset Timer', key="reset"):
             st.session_state.time_left = 30 * 60  # Reset to 30 minutes
             st.session_state.timer_running = False
-            st.session_state.timer_started = False
+            st.session_state.time_started = False
 
     # Timer countdown logic
     if st.session_state.timer_running:
@@ -55,7 +56,7 @@ def timer_function():
 
 # Page 1 - Topic Selection
 def topic_selection():
-    st.write("### Select Your Topics")
+    st.write("<h1 style='color: #FF6347;'>Extemp Speech Topics</h1>", unsafe_allow_html=True)
 
     # Prompt user to enter topics separated by newlines
     topics_input = st.text_area("Enter your topics, each on a new line:", height=200)
@@ -72,7 +73,7 @@ def topic_selection():
             chosen_topics = random.sample(topics, 3)
             
             # Display the 3 randomly selected topics
-            st.write("Here are your 3 randomly selected topics:")
+            st.write("<h3>Here are your 3 randomly selected topics:</h3>", unsafe_allow_html=True)
             for i, topic in enumerate(chosen_topics, 1):
                 st.write(f"{i}. {topic}")
             
@@ -87,7 +88,7 @@ def topic_selection():
 # Page 2 - Timer Screen
 def timer_screen():
     # Display the chosen topic in big letters
-    st.write(f"### Your Topic: **{st.session_state.selected_topic.upper()}**")
+    st.write(f"<h1 style='color: #008CBA; text-align: center;'>{st.session_state.selected_topic.upper()}</h1>", unsafe_allow_html=True)
     
     # Call the timer function
     timer_function()
