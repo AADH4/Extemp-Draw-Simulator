@@ -1,5 +1,51 @@
 import streamlit as st
 import random
+import time
+
+# Function to handle the timer logic
+def timer_function():
+    if 'start_time' not in st.session_state:
+        st.session_state.start_time = None
+        st.session_state.timer_running = False
+        st.session_state.elapsed_time = 0
+    
+    def start_timer():
+        st.session_state.start_time = time.time() - st.session_state.elapsed_time
+        st.session_state.timer_running = True
+    
+    def stop_timer():
+        if st.session_state.start_time:
+            st.session_state.elapsed_time = time.time() - st.session_state.start_time
+        st.session_state.timer_running = False
+
+    def reset_timer():
+        st.session_state.elapsed_time = 0
+        st.session_state.start_time = None
+        st.session_state.timer_running = False
+    
+    # Start/Stop/Reset buttons
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if not st.session_state.timer_running:
+            if st.button('Start Timer'):
+                start_timer()
+        else:
+            if st.button('Stop Timer'):
+                stop_timer()
+    
+    with col2:
+        if st.button('Reset Timer'):
+            reset_timer()
+
+    # Display timer
+    if st.session_state.timer_running:
+        st.session_state.elapsed_time = time.time() - st.session_state.start_time
+    minutes = int(st.session_state.elapsed_time // 60)
+    seconds = int(st.session_state.elapsed_time % 60)
+    time_display = f"{minutes:02d}:{seconds:02d}"
+
+    st.write("### Timer: ", time_display)
 
 # Title for the app
 st.title("Extemp Draw Simulation")
@@ -29,4 +75,16 @@ if st.button("Generate Topics"):
         
         # Display the chosen topic after selection
         if selected_topic:
-            st.write(f"Your selected topic is: {selected_topic}")
+            # Save the selected topic in session state
+            st.session_state.selected_topic = selected_topic
+            
+            # Move to the next screen to display the topic with the timer
+            st.experimental_rerun()
+
+# Check if a topic has been selected (from the dropdown)
+if 'selected_topic' in st.session_state:
+    # Display the chosen topic in big letters
+    st.write(f"### {st.session_state.selected_topic.upper()}")
+    
+    # Call the timer function
+    timer_function()
