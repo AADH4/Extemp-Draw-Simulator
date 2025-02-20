@@ -1,43 +1,6 @@
 import streamlit as st
-import random
 import time
-
-def topic_selection():
-    st.write("<h1 style='color: #FF6347;'>Extemp Speech Topics</h1>", unsafe_allow_html=True)
-
-    if 'form_submitted' not in st.session_state:
-        st.session_state.form_submitted = False
-
-    if 'topic_selected' not in st.session_state:
-        st.session_state.topic_selected = False
-
-    if not st.session_state.form_submitted:
-        topics_input = st.text_area("Enter your topics, each on a new line:", height=200)
-
-        if st.button("Generate Topics"):
-            topics = [topic.strip() for topic in topics_input.split('\n') if topic.strip()]
-            
-            if len(topics) < 3:
-                st.error("Please enter at least 3 topics.")
-            else:
-                st.session_state.chosen_topics = random.sample(topics, 3)
-                st.session_state.form_submitted = True
-                st.rerun()
-
-    elif not st.session_state.topic_selected:
-        st.write("<h3>Here are your 3 randomly selected topics:</h3>", unsafe_allow_html=True)
-        for i, topic in enumerate(st.session_state.chosen_topics, 1):
-            st.write(f"{i}. {topic}")
-        
-        selected_topic = st.selectbox("Choose one topic for your extemp:", st.session_state.chosen_topics)
-        
-        if selected_topic:
-            st.session_state.selected_topic = selected_topic
-            if st.button("Confirm Selection and Start Prep"):
-                st.session_state.topic_selected = True
-                st.session_state.start_time = time.time()
-                st.session_state.screen = "timer"
-                st.rerun()
+from streamlit_custom_notification_box import custom_notification_box
 
 def timer_screen():
     st.write(f"<h1 style='color: #008CBA; text-align: center;'>{st.session_state.selected_topic.upper()}</h1>", unsafe_allow_html=True)
@@ -51,13 +14,51 @@ def timer_screen():
     progress = 1 - (remaining_time / (30 * 60))
     st.progress(progress)
     
+    # Add custom styling for warnings
+    st.markdown("""
+    <style>
+    .warning-box {
+        background-color: #FFA500;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 18px;
+        text-align: center;
+        margin: 10px 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Define warning messages and times
+    warnings = {
+        600: "10 minutes remaining!",
+        300: "5 minutes remaining!",
+        0: "Time's up!"
+    }
+    
+    # Check for warnings
+    for warn_time, message in warnings.items():
+        if remaining_time == warn_time:
+            st.markdown(f"<div class='warning-box'>{message}</div>", unsafe_allow_html=True)
+            
+            # Add custom notification box
+            styles = {
+                'material-icons': {'color': 'orange'},
+                'text-icon-link-close-container': {'box-shadow': '#ff9800 0px 4px'},
+                'notification-text': {'font-size': '18px'},
+            }
+            custom_notification_box(
+                icon='warning',
+                textDisplay=message,
+                styles=styles,
+                key=f"warning_{warn_time}"
+            )
+            
+            # Play notification sound
+            st.audio("https://www.soundjay.com/buttons/sounds/button-3.mp3", auto_play=True)
+    
     if remaining_time <= 0:
-        st.error("Time's up!")
         st.balloons()
-    elif remaining_time == 5 * 60:
-        st.warning("5 minutes remaining!")
-    elif remaining_time == 10 * 60:
-        st.info("10 minutes remaining!")
     
     if st.button("Reset and Start Over"):
         st.session_state.form_submitted = False
@@ -67,15 +68,3 @@ def timer_screen():
     
     time.sleep(1)
     st.rerun()
-
-def main():
-    if 'screen' not in st.session_state:
-        st.session_state.screen = "topics"
-
-    if st.session_state.screen == "topics":
-        topic_selection()
-    elif st.session_state.screen == "timer":
-        timer_screen()
-
-if __name__ == "__main__":
-    main()
