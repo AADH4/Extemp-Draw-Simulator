@@ -4,17 +4,16 @@ from streamlit_custom_notification_box import custom_notification_box
 
 # Initialize session state variables
 if 'selected_topic' not in st.session_state:
-    st.session_state.selected_topic = ""  # Or some other appropriate default value
+    st.session_state.selected_topic = ""
 if 'start_time' not in st.session_state:
-    st.session_state.start_time = 0
+    st.session_state.start_time = time.time()
 if 'last_update' not in st.session_state:
     st.session_state.last_update = 0
 if 'warnings_shown' not in st.session_state:
     st.session_state.warnings_shown = set()
 
-
 def timer_screen():
-    if 'selected_topic' in st.session_state:
+    if st.session_state.selected_topic:
         st.write(f"<h1 style='color: #008CBA; text-align: center;'>{st.session_state.selected_topic.upper()}</h1>", unsafe_allow_html=True)
     else:
         st.write("<h1 style='color: #008CBA; text-align: center;'>No Topic Selected</h1>", unsafe_allow_html=True)
@@ -52,12 +51,18 @@ def timer_screen():
                     'text-icon-link-close-container': {'box-shadow': '#ff9800 0px 4px'},
                     'notification-text': {'font-size': '18px'},
                 }
-                custom_notification_box(
-                    icon='warning',
-                    textDisplay=message,
-                    styles=styles,
-                    key=f"warning_{warn_time}"
-                )
+                
+                try:
+                    custom_notification_box(
+                        icon='warning',
+                        textDisplay=message,
+                        styles=styles,
+                        key=f"warning_{warn_time}"
+                    )
+                except Exception as e:
+                    st.error(f"Error in custom_notification_box: {str(e)}")
+                    # Fallback to built-in Streamlit warning
+                    st.warning(message)
                 
                 st.audio("https://www.soundjay.com/buttons/sounds/button-3.mp3", auto_play=True)
         
@@ -66,7 +71,7 @@ def timer_screen():
             st.session_state.balloons_shown = True
     
     if st.button("Reset and Start Over"):
-        for key in ['form_submitted', 'topic_selected', 'warnings_shown', 'balloons_shown', 'last_update', 'selected_topic','start_time']:
+        for key in ['form_submitted', 'topic_selected', 'warnings_shown', 'balloons_shown', 'last_update', 'selected_topic', 'start_time']:
             if key in st.session_state:
                 del st.session_state[key]
         st.session_state.screen = "topics"
