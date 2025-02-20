@@ -10,8 +10,8 @@ def timer_function():
         st.session_state.timer_running = False
         st.session_state.timer_started = False
 
-    # Start/Stop/Reset Buttons
-    col1, col2, col3 = st.columns(3)
+    # Layout the buttons in columns
+    col1, col2, col3 = st.columns([1, 2, 1])
 
     with col1:
         if not st.session_state.timer_running:
@@ -28,6 +28,7 @@ def timer_function():
         if st.button('Reset Timer'):
             st.session_state.time_left = 30 * 60  # Reset to 30 minutes
             st.session_state.timer_running = False
+            st.session_state.timer_started = False
 
     # Timer countdown logic
     if st.session_state.timer_running:
@@ -39,7 +40,7 @@ def timer_function():
         # Display the countdown timer using st.empty() for live updating
         timer_display = f"{st.session_state.time_left // 60:02d}:{st.session_state.time_left % 60:02d}"
         timer_placeholder = st.empty()  # Create an empty placeholder
-        timer_placeholder.text(f"### Timer: {timer_display}")  # Update the display
+        timer_placeholder.text(f"### Time Remaining: {timer_display}")  # Update the display
         
         # Stop timer once it reaches 0
         if st.session_state.time_left == 0:
@@ -54,10 +55,10 @@ def timer_function():
 
 # Page 1 - Topic Selection
 def topic_selection():
-    st.write("### Select your topics for the extemp speech")
+    st.write("### Select Your Topics")
 
     # Prompt user to enter topics separated by newlines
-    topics_input = st.text_area("Enter your topics, each on a new line:")
+    topics_input = st.text_area("Enter your topics, each on a new line:", height=200)
 
     # When the user presses a button to submit
     if st.button("Generate Topics"):
@@ -72,9 +73,8 @@ def topic_selection():
             
             # Display the 3 randomly selected topics
             st.write("Here are your 3 randomly selected topics:")
-            st.write("1. ", chosen_topics[0])
-            st.write("2. ", chosen_topics[1])
-            st.write("3. ", chosen_topics[2])
+            for i, topic in enumerate(chosen_topics, 1):
+                st.write(f"{i}. {topic}")
             
             # Let the user choose one of the three topics
             selected_topic = st.selectbox("Choose one topic for your extemp:", chosen_topics)
@@ -87,7 +87,7 @@ def topic_selection():
 # Page 2 - Timer Screen
 def timer_screen():
     # Display the chosen topic in big letters
-    st.write(f"### {st.session_state.selected_topic.upper()}")
+    st.write(f"### Your Topic: **{st.session_state.selected_topic.upper()}**")
     
     # Call the timer function
     timer_function()
