@@ -1,54 +1,6 @@
 import streamlit as st
 import random
-
-# JavaScript Timer Embed
-timer_html = """
-<html>
-    <head>
-        <script>
-            var timeLeft = 30 * 60;  // 30 minutes in seconds
-            var timer;
-            var timerRunning = false;
-            function startTimer() {
-                if (!timerRunning) {
-                    timerRunning = true;
-                    timer = setInterval(function() {
-                        var minutes = Math.floor(timeLeft / 60);
-                        var seconds = timeLeft % 60;
-                        document.getElementById("timerDisplay").innerHTML = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-                        if (timeLeft <= 0) {
-                            clearInterval(timer);
-                            alert("Time's up!");
-                            timerRunning = false;
-                        } else {
-                            timeLeft--;
-                        }
-                    }, 1000);
-                }
-            }
-            function resetTimer() {
-                clearInterval(timer);
-                timeLeft = 30 * 60;
-                document.getElementById("timerDisplay").innerHTML = "30:00";
-                timerRunning = false;
-            }
-            function stopTimer() {
-                clearInterval(timer);
-                timerRunning = false;
-            }
-        </script>
-    </head>
-    <body>
-        <div style="text-align: center; font-size: 40px; color: #FF6347;">
-            <div id="timerDisplay">30:00</div>
-            <br>
-            <button onclick="startTimer()">Start Timer</button>
-            <button onclick="stopTimer()">Stop Timer</button>
-            <button onclick="resetTimer()">Reset Timer</button>
-        </div>
-    </body>
-</html>
-"""
+import time
 
 # Function to handle topic selection
 def topic_selection():
@@ -80,18 +32,38 @@ def topic_selection():
             if selected_topic:
                 st.session_state.selected_topic = selected_topic
                 st.session_state.screen = "timer"  # Change screen to timer
+                st.session_state.start_time = time.time()  # Set start time
+                st.experimental_rerun()
 
 # Function to handle the timer screen
 def timer_screen():
     # Display the chosen topic in big letters
     st.write(f"<h1 style='color: #008CBA; text-align: center;'>{st.session_state.selected_topic.upper()}</h1>", unsafe_allow_html=True)
     
-    # Embed the JavaScript timer
-    st.markdown(timer_html, unsafe_allow_html=True)
-
+    # Calculate remaining time
+    elapsed_time = int(time.time() - st.session_state.start_time)
+    remaining_time = max(30 * 60 - elapsed_time, 0)  # 30 minutes in seconds
+    
+    # Display timer
+    minutes, seconds = divmod(remaining_time, 60)
+    st.write(f"<h2 style='text-align: center; font-size: 48px;'>{minutes:02d}:{seconds:02d}</h2>", unsafe_allow_html=True)
+    
+    # Progress bar
+    progress = 1 - (remaining_time / (30 * 60))
+    st.progress(progress)
+    
+    # Check if time's up
+    if remaining_time <= 0:
+        st.error("Time's up!")
+    
     # Button to go back to topic selection
     if st.button("Back to Topic Selection"):
         st.session_state.screen = "topics"  # Go back to topic selection screen
+        st.experimental_rerun()
+    
+    # Rerun the app every second to update the timer
+    time.sleep(1)
+    st.experimental_rerun()
 
 # Main app logic (decides which screen to display)
 def main():
@@ -104,4 +76,5 @@ def main():
         timer_screen()
 
 # Run the app
-main()
+if __name__ == "__main__":
+    main()
