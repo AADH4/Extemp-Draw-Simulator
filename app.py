@@ -9,7 +9,7 @@ def timer_function():
         st.session_state.time_left = 30 * 60  # 30 minutes in seconds
         st.session_state.timer_running = False
         st.session_state.start_time = None
-        st.session_state.time_started = False
+        st.session_state.timer_started = False
 
     # Layout the buttons in columns
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -19,17 +19,18 @@ def timer_function():
             if st.button('Start Timer', key="start"):
                 st.session_state.timer_running = True
                 st.session_state.start_time = time.time()  # Record the start time when "Start" is pressed
+                st.session_state.timer_started = True
 
         else:
             if st.button('Stop Timer', key="stop"):
                 st.session_state.timer_running = False
                 st.session_state.time_left = max(0, int(st.session_state.time_left - (time.time() - st.session_state.start_time)))
-    
+
     with col2:
         if st.button('Reset Timer', key="reset"):
             st.session_state.time_left = 30 * 60  # Reset to 30 minutes
             st.session_state.timer_running = False
-            st.session_state.time_started = False
+            st.session_state.timer_started = False
 
     # Timer countdown logic
     if st.session_state.timer_running:
@@ -40,19 +41,19 @@ def timer_function():
 
         # Display the countdown timer using st.empty() for live updating
         timer_display = f"{st.session_state.time_left // 60:02d}:{st.session_state.time_left % 60:02d}"
+
         timer_placeholder = st.empty()  # Create an empty placeholder
-        timer_placeholder.text(f"### Time Remaining: {timer_display}")  # Update the display
-        
+        timer_placeholder.text(f"<h1 style='color: #FF6347; text-align: center;'>{timer_display}</h1>", unsafe_allow_html=True)  # Update the display
+
         # Stop timer once it reaches 0
         if st.session_state.time_left == 0:
-            timer_placeholder.text("### Time's up!")
+            timer_placeholder.text("<h1 style='color: #FF6347; text-align: center;'>Time's up!</h1>", unsafe_allow_html=True)
             st.session_state.timer_running = False
             st.error("Time is up! Please stop your speech.")
-
     else:
         # Display the initial 30 minutes timer
         timer_placeholder = st.empty()
-        timer_placeholder.text("### Timer: 30:00")
+        timer_placeholder.text("<h1 style='color: #008CBA; text-align: center;'>30:00</h1>", unsafe_allow_html=True)
 
 # Page 1 - Topic Selection
 def topic_selection():
