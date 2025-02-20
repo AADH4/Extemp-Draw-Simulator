@@ -5,28 +5,39 @@ import time
 def topic_selection():
     st.write("<h1 style='color: #FF6347;'>Extemp Speech Topics</h1>", unsafe_allow_html=True)
 
-    topics_input = st.text_area("Enter your topics, each on a new line:", height=200)
+    if 'form_submitted' not in st.session_state:
+        st.session_state.form_submitted = False
 
-    if st.button("Generate Topics"):
-        topics = [topic.strip() for topic in topics_input.split('\n') if topic.strip()]
+    if 'topic_selected' not in st.session_state:
+        st.session_state.topic_selected = False
+
+    if not st.session_state.form_submitted:
+        topics_input = st.text_area("Enter your topics, each on a new line:", height=200)
+
+        if st.button("Generate Topics"):
+            topics = [topic.strip() for topic in topics_input.split('\n') if topic.strip()]
+            
+            if len(topics) < 3:
+                st.error("Please enter at least 3 topics.")
+            else:
+                st.session_state.chosen_topics = random.sample(topics, 3)
+                st.session_state.form_submitted = True
+                st.rerun()
+
+    elif not st.session_state.topic_selected:
+        st.write("<h3>Here are your 3 randomly selected topics:</h3>", unsafe_allow_html=True)
+        for i, topic in enumerate(st.session_state.chosen_topics, 1):
+            st.write(f"{i}. {topic}")
         
-        if len(topics) < 3:
-            st.error("Please enter at least 3 topics.")
-        else:
-            chosen_topics = random.sample(topics, 3)
-            
-            st.write("<h3>Here are your 3 randomly selected topics:</h3>", unsafe_allow_html=True)
-            for i, topic in enumerate(chosen_topics, 1):
-                st.write(f"{i}. {topic}")
-            
-            selected_topic = st.selectbox("Choose one topic for your extemp:", chosen_topics)
-            
-            if selected_topic:
-                st.session_state.selected_topic = selected_topic
-                if st.button("Confirm Selection and Start Prep"):
-                    st.session_state.screen = "timer"
-                    st.session_state.start_time = time.time()
-                    st.rerun()
+        selected_topic = st.selectbox("Choose one topic for your extemp:", st.session_state.chosen_topics)
+        
+        if selected_topic:
+            st.session_state.selected_topic = selected_topic
+            if st.button("Confirm Selection and Start Prep"):
+                st.session_state.topic_selected = True
+                st.session_state.start_time = time.time()
+                st.session_state.screen = "timer"
+                st.rerun()
 
 def timer_screen():
     st.write(f"<h1 style='color: #008CBA; text-align: center;'>{st.session_state.selected_topic.upper()}</h1>", unsafe_allow_html=True)
@@ -48,7 +59,9 @@ def timer_screen():
     elif remaining_time == 10 * 60:
         st.info("10 minutes remaining!")
     
-    if st.button("Back to Topic Selection"):
+    if st.button("Reset and Start Over"):
+        st.session_state.form_submitted = False
+        st.session_state.topic_selected = False
         st.session_state.screen = "topics"
         st.rerun()
     
