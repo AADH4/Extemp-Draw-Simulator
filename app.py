@@ -4,24 +4,28 @@ import time
 
 # Function to handle the timer logic
 def timer_function():
-    if 'start_time' not in st.session_state:
-        st.session_state.start_time = None
+    # Initialize session state if not already done
+    if 'time_left' not in st.session_state:
+        st.session_state.time_left = 30 * 60  # 30 minutes in seconds
         st.session_state.timer_running = False
-        st.session_state.elapsed_time = 0
+        st.session_state.timer_started = False
     
+    # Function to start the timer
     def start_timer():
-        st.session_state.start_time = time.time() - st.session_state.elapsed_time
         st.session_state.timer_running = True
+        st.session_state.timer_started = True
+        st.session_state.start_time = time.time() - st.session_state.time_left
     
+    # Function to stop the timer
     def stop_timer():
-        if st.session_state.start_time:
-            st.session_state.elapsed_time = time.time() - st.session_state.start_time
         st.session_state.timer_running = False
-
+        st.session_state.time_left = max(0, int(st.session_state.time_left - (time.time() - st.session_state.start_time)))
+    
+    # Function to reset the timer
     def reset_timer():
-        st.session_state.elapsed_time = 0
-        st.session_state.start_time = None
+        st.session_state.time_left = 30 * 60  # Reset to 30 minutes
         st.session_state.timer_running = False
+        st.session_state.timer_started = False
     
     # Start/Stop/Reset buttons
     col1, col2, col3 = st.columns(3)
@@ -38,15 +42,26 @@ def timer_function():
         if st.button('Reset Timer'):
             reset_timer()
 
-    # Display timer
+    # Timer countdown logic
     if st.session_state.timer_running:
-        st.session_state.elapsed_time = time.time() - st.session_state.start_time
-    minutes = int(st.session_state.elapsed_time // 60)
-    seconds = int(st.session_state.elapsed_time % 60)
-    time_display = f"{minutes:02d}:{seconds:02d}"
+        st.session_state.time_left = max(0, int(time.time() - st.session_state.start_time))
 
+    minutes = st.session_state.time_left // 60
+    seconds = st.session_state.time_left % 60
+
+    time_display = f"{minutes:02d}:{seconds:02d}"
     st.write("### Timer: ", time_display)
 
+    # Alert the user for 10 and 5 minute warnings
+    if st.session_state.time_left == 600:
+        st.warning("10-minute warning!")
+    elif st.session_state.time_left == 300:
+        st.warning("5-minute warning!")
+    
+    # When time is over
+    if st.session_state.time_left == 0:
+        st.error("Time is up! Please stop your speech.")
+    
 # Title for the app
 st.title("Extemp Draw Simulation")
 
