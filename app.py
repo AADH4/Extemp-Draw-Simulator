@@ -8,23 +8,33 @@ timer_html = """
         <script>
             var timeLeft = 30 * 60;  // 30 minutes in seconds
             var timer;
+            var timerRunning = false;
             function startTimer() {
-                timer = setInterval(function() {
-                    var minutes = Math.floor(timeLeft / 60);
-                    var seconds = timeLeft % 60;
-                    document.getElementById("timerDisplay").innerHTML = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-                    if (timeLeft <= 0) {
-                        clearInterval(timer);
-                        alert("Time's up!");
-                    } else {
-                        timeLeft--;
-                    }
-                }, 1000);
+                if (!timerRunning) {
+                    timerRunning = true;
+                    timer = setInterval(function() {
+                        var minutes = Math.floor(timeLeft / 60);
+                        var seconds = timeLeft % 60;
+                        document.getElementById("timerDisplay").innerHTML = minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+                        if (timeLeft <= 0) {
+                            clearInterval(timer);
+                            alert("Time's up!");
+                            timerRunning = false;
+                        } else {
+                            timeLeft--;
+                        }
+                    }, 1000);
+                }
             }
             function resetTimer() {
                 clearInterval(timer);
                 timeLeft = 30 * 60;
                 document.getElementById("timerDisplay").innerHTML = "30:00";
+                timerRunning = false;
+            }
+            function stopTimer() {
+                clearInterval(timer);
+                timerRunning = false;
             }
         </script>
     </head>
@@ -33,6 +43,7 @@ timer_html = """
             <div id="timerDisplay">30:00</div>
             <br>
             <button onclick="startTimer()">Start Timer</button>
+            <button onclick="stopTimer()">Stop Timer</button>
             <button onclick="resetTimer()">Reset Timer</button>
         </div>
     </body>
