@@ -43,17 +43,17 @@ def timer_function():
         timer_display = f"{st.session_state.time_left // 60:02d}:{st.session_state.time_left % 60:02d}"
 
         timer_placeholder = st.empty()  # Create an empty placeholder
-        timer_placeholder.text(f"<h1 style='color: #FF6347; text-align: center;'>{timer_display}</h1>", unsafe_allow_html=True)  # Update the display
+        timer_placeholder.text(f"### Time Remaining: {timer_display}")  # Update the display
 
         # Stop timer once it reaches 0
         if st.session_state.time_left == 0:
-            timer_placeholder.text("<h1 style='color: #FF6347; text-align: center;'>Time's up!</h1>", unsafe_allow_html=True)
+            timer_placeholder.text("### Time's up!")
             st.session_state.timer_running = False
             st.error("Time is up! Please stop your speech.")
     else:
         # Display the initial 30 minutes timer
         timer_placeholder = st.empty()
-        timer_placeholder.text("<h1 style='color: #008CBA; text-align: center;'>30:00</h1>", unsafe_allow_html=True)
+        timer_placeholder.text("### Timer: 30:00")
 
 # Page 1 - Topic Selection
 def topic_selection():
