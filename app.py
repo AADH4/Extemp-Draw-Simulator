@@ -1,7 +1,6 @@
 import streamlit as st
 import time
 import random
-from streamlit_custom_notification_box import custom_notification_box
 
 # Initialize session state variables
 if 'screen' not in st.session_state:
@@ -14,8 +13,6 @@ if 'selected_topic' not in st.session_state:
     st.session_state.selected_topic = ""
 if 'start_time' not in st.session_state:
     st.session_state.start_time = 0
-if 'last_update' not in st.session_state:
-    st.session_state.last_update = 0
 if 'warnings_shown' not in st.session_state:
     st.session_state.warnings_shown = set()
 
@@ -71,33 +68,14 @@ def timer_screen():
     for warn_time, message in warnings.items():
         if remaining_time <= warn_time and warn_time not in st.session_state.warnings_shown:
             st.session_state.warnings_shown.add(warn_time)
-            st.markdown(f"<div class='warning-box'>{message}</div>", unsafe_allow_html=True)
-            
-            styles = {
-                'material-icons': {'color': 'orange'},
-                'text-icon-link-close-container': {'box-shadow': '#ff9800 0px 4px'},
-                'notification-text': {'font-size': '18px'},
-            }
-            
-            try:
-                custom_notification_box(
-                    icon='warning',
-                    textDisplay=message,
-                    styles=styles,
-                    key=f"warning_{warn_time}"
-                )
-            except Exception as e:
-                st.error(f"Error in custom_notification_box: {str(e)}")
-                st.warning(message)
-            
-            st.audio("https://www.soundjay.com/buttons/sounds/button-3.mp3", auto_play=True)
+            st.warning(message)
     
     if remaining_time <= 0 and 'balloons_shown' not in st.session_state:
         st.balloons()
         st.session_state.balloons_shown = True
     
     if st.button("Reset and Start Over"):
-        for key in ['screen', 'topics', 'selected_topics', 'selected_topic', 'start_time', 'last_update', 'warnings_shown', 'balloons_shown']:
+        for key in ['screen', 'topics', 'selected_topics', 'selected_topic', 'start_time', 'warnings_shown', 'balloons_shown']:
             if key in st.session_state:
                 del st.session_state[key]
         st.rerun()
